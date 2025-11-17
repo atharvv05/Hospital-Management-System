@@ -8,12 +8,12 @@
         <div class="row justify-content-center">
             <div class="col-md-8 col-lg-5">
                 <div class="card shadow-custom-lg">
-                    <div class="card-header">
+                    <div class="card-header bg-gradient-primary">
                         <div class="d-flex align-items-center justify-content-center">
-                            <i class="fas fa-hospital-user me-2" style="font-size: 1.8rem; color: var(--primary-blue);"></i>
-                            <h3 class="mb-0">Medicare HMS</h3>
+                            <i class="fas fa-hospital-user me-2" style="font-size: 1.8rem; color: white;"></i>
+                            <h3 class="mb-0" style="color: white;">Medicare HMS</h3>
                         </div>
-                        <p class="text-center text-muted small mb-0 mt-2">Professional Healthcare Management System</p>
+                        <p class="text-center text-white-50 small mb-0 mt-2">Professional Healthcare Management System</p>
                     </div>
                     <div class="card-body">
                         <h5 class="mb-4 text-center">
@@ -25,21 +25,21 @@
                                 <label for="role" class="form-label">
                                     <i class="fas fa-id-badge me-2"></i>Your Role
                                 </label>
-                                <select class="form-select" id="role" name="role" required>
+                                <select class="form-select" id="role" name="role" required onchange="updateRoleInfo()">
                                     <option value="">-- Select your role --</option>
-                                    <option value="patient">
-                                        <i class="fas fa-hospital-user"></i> Patient
-                                    </option>
-                                    <option value="doctor">
-                                        <i class="fas fa-user-md"></i> Doctor
-                                    </option>
-                                    <option value="admin">
-                                        <i class="fas fa-user-shield"></i> Administrator
-                                    </option>
+                                    <option value="patient">👤 Patient - Book appointments & view medical records</option>
+                                    <option value="doctor">👨‍⚕️ Doctor - Manage appointments & patients</option>
+                                    <option value="admin">👨‍💼 Administrator - System management</option>
                                 </select>
                                 <small class="text-muted d-block mt-1">
-                                    Select the role associated with your account
+                                    <strong>⚠️ Important:</strong> Select the role that matches your account
                                 </small>
+                            </div>
+
+                            <!-- Role Info Alert -->
+                            <div class="alert alert-info small mt-3" id="roleInfo" style="display: none;">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <span id="roleDescription"></span>
                             </div>
 
                             <div class="form-group">
@@ -64,35 +64,49 @@
                         </form>
 
                         <script>
+                            function updateRoleInfo() {
+                                const role = document.getElementById('role').value;
+                                const roleInfo = document.getElementById('roleInfo');
+                                const roleDescription = document.getElementById('roleDescription');
+                                
+                                if (role) {
+                                    roleInfo.style.display = 'block';
+                                    if (role === 'patient') {
+                                        roleDescription.textContent = '✅ Patients can book appointments, view medical history, and manage their health records.';
+                                    } else if (role === 'doctor') {
+                                        roleDescription.textContent = '✅ Doctors manage patient appointments, write prescriptions, and view patient records.';
+                                    } else if (role === 'admin') {
+                                        roleDescription.textContent = '✅ Administrators can add doctors, manage patients, and view system reports.';
+                                    }
+                                } else {
+                                    roleInfo.style.display = 'none';
+                                }
+                            }
+
                             document.getElementById('loginForm').addEventListener('submit', function(e) {
                                 const btn = document.getElementById('loginBtn');
                                 const btnText = document.getElementById('btnText');
                                 btn.disabled = true;
                                 btnText.textContent = 'Logging in...';
-                                // Form will submit normally after 500ms to ensure visual feedback
-                                setTimeout(() => {
-                                    this.submit();
-                                }, 500);
-                                return false;
                             });
                         </script>
 
                         <hr class="divider">
 
-                        <!-- Info Message -->
-                        <div class="alert alert-light border-primary small mb-3">
-                            <i class="fas fa-info-circle me-2 text-primary"></i>
-                            <strong>New to Medicare?</strong><br>
-                            Create an account with your preferred role and start using our platform.
-                        </div>
-
                         <!-- Registration Link -->
-                        <p class="text-center mb-0">
+                        <p class="text-center mb-3">
                             Don't have an account?<br>
                             <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary btn-sm mt-2 w-100">
-                                <i class="fas fa-user-plus me-2"></i>Create New Account
+                                <i class="fas fa-user-plus me-2"></i>Create Patient Account
                             </a>
                         </p>
+
+                        <!-- Admin/Doctor Info -->
+                        <div class="alert alert-warning small">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>👨‍⚕️ Doctor or 👨‍💼 Admin?</strong><br>
+                            <small>If you're a new doctor or admin, please contact your system administrator to be added to the system.</small>
+                        </div>
                     </div>
                 </div>
 

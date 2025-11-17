@@ -41,30 +41,90 @@ def doctors():
 @login_required
 @admin_required
 def add_doctor():
+    """
+    Admin-only route to add a new doctor to the system.
+    Doctors cannot register themselves; admins must create their accounts.
+    """
     if request.method == 'POST':
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
         department_id = request.form.get('department_id')
         phone = request.form.get('phone')
-        experience_years = request.form.get('experience_years')
+        license_number = request.form.get('license_number')
+        qualification = request.form.get('qualification')
+        specialization = request.form.get('specialization')
+        experience_years = request.form.get('experience_years', 0)
         
+        # Validation: Check if username exists
         if User.query.filter_by(username=username).first():
-            flash('Username already exists', 'danger')
+            flash('Username already exists. Please choose another.', 'danger')
             return redirect(url_for('admin.add_doctor'))
         
-        user = User(username=username, email=email, role='doctor')
-        user.set_password(password)
-        db.session.add(user)
-        db.session.commit()
+        # Validation: Check if email exists
+        if User.query.filter_by(email=email).first():
+            flash('Email already registered. Please use another email.', 'danger')
+            return redirect(url_for('admin.add_doctor'))
         
-        doctor = Doctor(user_id=user.id, department_id=department_id, 
-                       phone=phone, experience_years=experience_years)
-        db.session.add(doctor)
-        db.session.commit()
+        # Validation: Check if license number exists
+        if Doctor.query.filter_by(license_number=license_number).first():
+            flash('License number already exists in system.', 'danger')
+            return redirect(url_for('admin.add_doctor'))
         
-        flash('Doctor added successfully', 'success')
-        return redirect(url_for('admin.doctors'))
+        # Validation: Check password match
+        if password != confirm_password:
+            flash('Passwords do not match.', 'danger')
+            return redirect(url_for('admin.add_doctor'))
+        
+        # Validation: Check password strength
+        if len(password) < 6:
+            flash('Password must be at least 6 characters long.', 'danger')
+            return redirect(url_for('admin.add_doctor'))
+        
+        # Validation: Check department
+        try:
+            department_id = int(department_id)
+            dept = Department.query.get(department_id)
+            if not dept:
+                flash('Invalid department selected.', 'danger')
+                return redirect(url_for('admin.add_doctor'))
+        except (ValueError, TypeError):
+            flash('Invalid department selection.', 'danger')
+            return redirect(url_for('admin.add_doctor'))
+        
+        try:
+            # Create user account
+            user = User(username=username, email=email, role='doctor', is_active=True)
+            user.set_password(password)
+            db.session.add(user)
+            db.session.flush()  # Get the user ID without committing
+            
+            # Create doctor profile
+            try:
+                experience_years = int(experience_years) if experience_years else 0
+            except (ValueError, TypeError):
+                experience_years = 0
+            
+            doctor = Doctor(
+                user_id=user.id,
+                department_id=department_id,
+                phone=phone,
+                license_number=license_number,
+                qualification=qualification,
+                specialization=specialization,
+                experience_years=experience_years
+            )
+            db.session.add(doctor)
+            db.session.commit()
+            
+            flash(f'✅ Doctor "{username}" added successfully! They can now login with their credentials.', 'success')
+            return redirect(url_for('admin.doctors'))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error adding doctor: {str(e)}', 'danger')
+            return redirect(url_for('admin.add_doctor'))
     
     departments = Department.query.all()
     return render_template('admin/add_doctor.html', departments=departments)

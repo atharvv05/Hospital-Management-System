@@ -55,25 +55,15 @@ def register():
         role = request.form.get('role', 'patient')
         department_id = request.form.get('department_id')
         
-        # Validate role
-        if role not in ['admin', 'doctor', 'patient']:
-            flash('Invalid role selected', 'danger')
+        # Validate role - ONLY PATIENTS and ADMINS can self-register (not doctors)
+        if role not in ['patient', 'admin']:
+            flash('Doctors cannot self-register. Your hospital administrator must add you. Please contact your admin.', 'danger')
             return redirect(url_for('auth.register'))
         
-        # Validate department for doctors
-        if role == 'doctor':
-            if not department_id:
-                flash('Please select a department/specialization', 'danger')
-                return redirect(url_for('auth.register'))
-            try:
-                department_id = int(department_id)
-                dept = Department.query.get(department_id)
-                if not dept:
-                    flash('Invalid department selected', 'danger')
-                    return redirect(url_for('auth.register'))
-            except (ValueError, TypeError):
-                flash('Invalid department selection', 'danger')
-                return redirect(url_for('auth.register'))
+        # Prevent admin self-registration (only one predefined admin exists)
+        if role == 'admin':
+            flash('Admin accounts can only be created by system administrators. Please contact your IT support.', 'danger')
+            return redirect(url_for('auth.register'))
         
         # Check password match
         if password != confirm_password:
@@ -96,20 +86,17 @@ def register():
             return redirect(url_for('auth.register'))
         
         try:
-            # Create user account
+            # Create user account (ONLY for patient role now)
             user = User(username=username, email=email, role=role, is_active=True)
             user.set_password(password)
             db.session.add(user)
             db.session.flush()  # Get the user ID without committing
             
-            # Create role-specific profile
+            # Create role-specific profile (only for patient)
             if role == 'patient':
                 patient = Patient(user_id=user.id)
                 db.session.add(patient)
-            elif role == 'doctor':
-                doctor = Doctor(user_id=user.id, department_id=department_id)
-                db.session.add(doctor)
-            # Admin doesn't need a separate profile
+            # Doctor and Admin profiles are created by admin, not during registration
             
             db.session.commit()
             
