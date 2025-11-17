@@ -1,46 +1,148 @@
 {% extends "base.html" %}
 
-{% block title %}Appointments - HMS{% endblock %}
+{% block title %}View Appointments - Medicare HMS{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-md-12">
-        <h2>All Appointments</h2>
+<div class="container-fluid mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="display-6" style="color: var(--primary-blue);">
+                <i class="fas fa-calendar-check me-2"></i>All Appointments
+            </h2>
+            <p class="text-muted">View and manage all patient appointments</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <div class="btn-group" role="group">
+                <a href="{{ url_for('admin.appointments', status='all') }}" 
+                   class="btn {% if status_filter == 'all' %}btn-primary active{% else %}btn-outline-primary{% endif %}">
+                    <i class="fas fa-list me-1"></i>All
+                </a>
+                <a href="{{ url_for('admin.appointments', status='Booked') }}" 
+                   class="btn {% if status_filter == 'Booked' %}btn-info active{% else %}btn-outline-info{% endif %}">
+                    <i class="fas fa-calendar me-1"></i>Upcoming
+                </a>
+                <a href="{{ url_for('admin.appointments', status='Completed') }}" 
+                   class="btn {% if status_filter == 'Completed' %}btn-success active{% else %}btn-outline-success{% endif %}">
+                    <i class="fas fa-check me-1"></i>Completed
+                </a>
+            </div>
+        </div>
     </div>
-</div>
 
-<div class="table-responsive">
-    <table class="table table-striped table-hover">
-        <thead class="table-dark">
-            <tr>
-                <th>ID</th>
-                <th>Patient</th>
-                <th>Doctor</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for appointment in appointments %}
-            <tr>
-                <td>{{ appointment.id }}</td>
-                <td>{{ appointment.patient.user.username }}</td>
-                <td>{{ appointment.doctor.user.username }}</td>
-                <td>{{ appointment.appointment_date }}</td>
-                <td>{{ appointment.appointment_time }}</td>
-                <td>
-                    {% if appointment.status == 'Booked' %}
-                    <span class="badge bg-info">{{ appointment.status }}</span>
-                    {% elif appointment.status == 'Completed' %}
-                    <span class="badge bg-success">{{ appointment.status }}</span>
-                    {% else %}
-                    <span class="badge bg-danger">{{ appointment.status }}</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <!-- Appointments Table -->
+    <div class="row">
+        <div class="col-lg-12">
+            {% if appointments.items %}
+                <div class="card shadow-sm">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Patient</th>
+                                    <th>Doctor</th>
+                                    <th>Department</th>
+                                    <th>Date & Time</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Fees</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in appointments.items %}
+                                <tr>
+                                    <td><strong>#{{ appointment.id }}</strong></td>
+                                    <td>
+                                        <i class="fas fa-user-circle me-1"></i>
+                                        {{ appointment.patient.user.username }}
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-stethoscope me-1"></i>
+                                        {{ appointment.doctor.user.username }}
+                                    </td>
+                                    <td>{{ appointment.doctor.department.name }}</td>
+                                    <td>
+                                        <i class="fas fa-calendar me-1"></i>{{ appointment.appointment_date }}<br>
+                                        <i class="fas fa-clock me-1"></i><small>{{ appointment.appointment_time }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark">{{ appointment.appointment_type }}</span>
+                                    </td>
+                                    <td>
+                                        {% if appointment.status == 'Booked' %}
+                                            <span class="badge bg-info">
+                                                <i class="fas fa-hourglass-half me-1"></i>{{ appointment.status }}
+                                            </span>
+                                        {% elif appointment.status == 'Confirmed' %}
+                                            <span class="badge bg-primary">
+                                                <i class="fas fa-check me-1"></i>{{ appointment.status }}
+                                            </span>
+                                        {% elif appointment.status == 'Completed' %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check-double me-1"></i>{{ appointment.status }}
+                                            </span>
+                                        {% elif appointment.status == 'Cancelled' %}
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-times me-1"></i>{{ appointment.status }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-warning">{{ appointment.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if appointment.consultation_fees %}
+                                            <strong>₹{{ appointment.consultation_fees }}</strong>
+                                        {% else %}
+                                            <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                {% if appointments.pages > 1 %}
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if appointments.has_prev %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('admin.appointments', status=status_filter, page=appointments.prev_num) }}">Previous</a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for page_num in appointments.iter_pages() %}
+                            {% if page_num %}
+                                {% if page_num == appointments.page %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ page_num }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('admin.appointments', status=status_filter, page=page_num) }}">{{ page_num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if appointments.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('admin.appointments', status=status_filter, page=appointments.next_num) }}">Next</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No appointments found with status "{{ status_filter }}".
+                </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
 {% endblock %}

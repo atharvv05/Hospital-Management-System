@@ -6,6 +6,8 @@ from models.doctor import Doctor
 from models.patient import Patient
 from models.appointment import Appointment
 from models.department import Department
+from datetime import datetime
+from sqlalchemy import or_, and_
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -21,21 +23,93 @@ def admin_required(f):
 @admin_bp.route('/dashboard')
 @admin_required
 def dashboard():
+    """Enhanced admin dashboard with KPIs and statistics"""
     total_doctors = Doctor.query.count()
     total_patients = Patient.query.count()
     total_appointments = Appointment.query.count()
     
+    # Upcoming appointments (today onwards)
+    today = datetime.today().date()
+    upcoming_appointments = Appointment.query.filter(
+        and_(
+            Appointment.appointment_date >= today,
+            Appointment.status.in_(['Booked', 'Confirmed'])
+        )
+    ).count()
+    
+    # Past appointments (completed)
+    past_appointments = Appointment.query.filter(
+        Appointment.status == 'Completed'
+    ).count()
+    
+    # Get active doctors (is_active = True)
+    active_doctors = Doctor.query.join(User).filter(User.is_active == True).count()
+    
+    # Get active patients (is_active = True)
+    active_patients = Patient.query.join(User).filter(User.is_active == True).count()
+    
+    # Department statistics
+    departments = Department.query.all()
+    dept_stats = []
+    for dept in departments:
+        doctor_count = Doctor.query.filter_by(department_id=dept.id).count()
+        dept_stats.append({
+            'name': dept.name,
+            'doctors': doctor_count
+        })
+    
     return render_template('admin/dashboard.html', 
-                         doctors=total_doctors, 
-                         patients=total_patients, 
-                         appointments=total_appointments)
+                         total_doctors=total_doctors,
+                         active_doctors=active_doctors,
+                         total_patients=total_patients,
+                         active_patients=active_patients,
+                         total_appointments=total_appointments,
+                         upcoming_appointments=upcoming_appointments,
+                         past_appointments=past_appointments,
+                         dept_stats=dept_stats)
 
 @admin_bp.route('/doctors')
-@login_required
 @admin_required
 def doctors():
-    doctors = Doctor.query.all()
+    """View all doctors with active/inactive status"""
+    page = request.args.get('page', 1, type=int)
+    doctors = Doctor.query.join(User).paginate(page=page, per_page=10)
     return render_template('admin/doctors.html', doctors=doctors)
+
+@admin_bp.route('/doctor/<int:doctor_id>/edit', methods=['GET', 'POST'])
+@admin_required
+def edit_doctor(doctor_id):
+    """Edit doctor profile"""
+    doctor = Doctor.query.get_or_404(doctor_id)
+    departments = Department.query.all()
+    
+    if request.method == 'POST':
+        # Validate license uniqueness (if changed)
+        new_license = request.form.get('license_number')
+        if new_license != doctor.license_number:
+            if Doctor.query.filter_by(license_number=new_license).first():
+                flash('License number already exists.', 'danger')
+                return redirect(url_for('admin.edit_doctor', doctor_id=doctor_id))
+        
+        # Update doctor fields
+        try:
+            doctor.phone = request.form.get('phone')
+            doctor.license_number = new_license
+            doctor.qualification = request.form.get('qualification')
+            doctor.specialization = request.form.get('specialization')
+            doctor.department_id = int(request.form.get('department_id'))
+            doctor.experience_years = int(request.form.get('experience_years', 0))
+            
+            db.session.commit()
+            flash(f'✅ Doctor "{doctor.user.username}" updated successfully.', 'success')
+            return redirect(url_for('admin.doctors'))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error updating doctor: {str(e)}', 'danger')
+            return redirect(url_for('admin.edit_doctor', doctor_id=doctor_id))
+    
+    return render_template('admin/edit_doctor.html', doctor=doctor, departments=departments)
 
 @admin_bp.route('/add-doctor', methods=['GET', 'POST'])
 @login_required
@@ -130,31 +204,154 @@ def add_doctor():
     return render_template('admin/add_doctor.html', departments=departments)
 
 @admin_bp.route('/appointments')
-@login_required
 @admin_required
 def appointments():
-    appointments = Appointment.query.all()
-    return render_template('admin/appointments.html', appointments=appointments)
+    """View all appointments with filtering options"""
+    page = request.args.get('page', 1, type=int)
+    status_filter = request.args.get('status', 'all')
+    
+    query = Appointment.query
+    
+    # Filter by status
+    if status_filter != 'all':
+        query = query.filter_by(status=status_filter)
+    
+    appointments = query.order_by(Appointment.appointment_date.desc()).paginate(page=page, per_page=15)
+    
+    return render_template('admin/appointments.html', 
+                         appointments=appointments, 
+                         status_filter=status_filter)
 
 @admin_bp.route('/patients')
-@login_required
 @admin_required
 def patients():
-    patients = Patient.query.all()
+    """View all patients with active/inactive status"""
+    page = request.args.get('page', 1, type=int)
+    patients = Patient.query.join(User).paginate(page=page, per_page=10)
     return render_template('admin/patients.html', patients=patients)
 
-@admin_bp.route('/search', methods=['GET', 'POST'])
-@login_required
+@admin_bp.route('/search/patients', methods=['GET', 'POST'])
 @admin_required
-def search():
+def search_patients():
+    """Search patients by name, ID, email, or contact"""
     results = []
-    search_type = request.form.get('search_type') if request.method == 'POST' else request.args.get('search_type')
-    query = request.form.get('query') if request.method == 'POST' else request.args.get('query')
+    query_text = ''
     
-    if query:
-        if search_type == 'doctor':
-            results = Doctor.query.filter(Doctor.user.has(username=query)).all()
-        elif search_type == 'patient':
-            results = Patient.query.filter(Patient.user.has(username=query)).all()
+    if request.method == 'POST' or request.args.get('q'):
+        query_text = request.form.get('q') or request.args.get('q', '')
+        
+        if query_text:
+            # Search in patient name (via user), email, phone, or ID
+            results = Patient.query.join(User).filter(
+                or_(
+                    User.username.ilike(f'%{query_text}%'),
+                    User.email.ilike(f'%{query_text}%'),
+                    Patient.phone.ilike(f'%{query_text}%'),
+                    Patient.alternate_phone.ilike(f'%{query_text}%'),
+                    Patient.id == query_text if query_text.isdigit() else False
+                )
+            ).all()
     
-    return render_template('admin/search.html', results=results, query=query, search_type=search_type)
+    return render_template('admin/search_patients.html', results=results, query=query_text)
+
+@admin_bp.route('/search/doctors', methods=['GET', 'POST'])
+@admin_required
+def search_doctors():
+    """Search doctors by name or specialization"""
+    results = []
+    query_text = ''
+    
+    if request.method == 'POST' or request.args.get('q'):
+        query_text = request.form.get('q') or request.args.get('q', '')
+        
+        if query_text:
+            # Search in doctor name (via user) or specialization
+            results = Doctor.query.join(User).filter(
+                or_(
+                    User.username.ilike(f'%{query_text}%'),
+                    Doctor.specialization.ilike(f'%{query_text}%'),
+                    Doctor.qualification.ilike(f'%{query_text}%')
+                )
+            ).all()
+    
+    return render_template('admin/search_doctors.html', results=results, query=query_text)
+
+@admin_bp.route('/doctor/<int:doctor_id>/toggle-status', methods=['POST'])
+@admin_required
+def toggle_doctor_status(doctor_id):
+    """Enable/disable doctor account"""
+    doctor = Doctor.query.get_or_404(doctor_id)
+    user = doctor.user
+    
+    try:
+        user.is_active = not user.is_active
+        db.session.commit()
+        
+        status = "enabled" if user.is_active else "disabled"
+        flash(f'✅ Doctor "{user.username}" has been {status}.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error updating doctor status: {str(e)}', 'danger')
+    
+    return redirect(url_for('admin.doctors'))
+
+@admin_bp.route('/doctor/<int:doctor_id>/remove', methods=['POST'])
+@admin_required
+def remove_doctor(doctor_id):
+    """Permanently remove doctor from system"""
+    doctor = Doctor.query.get_or_404(doctor_id)
+    user = doctor.user
+    
+    try:
+        # Delete doctor profile first
+        db.session.delete(doctor)
+        # Delete user account
+        db.session.delete(user)
+        db.session.commit()
+        
+        flash(f'✅ Doctor "{user.username}" has been permanently removed from the system.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error removing doctor: {str(e)}', 'danger')
+    
+    return redirect(url_for('admin.doctors'))
+
+@admin_bp.route('/patient/<int:patient_id>/toggle-status', methods=['POST'])
+@admin_required
+def toggle_patient_status(patient_id):
+    """Enable/disable patient account"""
+    patient = Patient.query.get_or_404(patient_id)
+    user = patient.user
+    
+    try:
+        user.is_active = not user.is_active
+        db.session.commit()
+        
+        status = "enabled" if user.is_active else "disabled"
+        flash(f'✅ Patient "{user.username}" has been {status}.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error updating patient status: {str(e)}', 'danger')
+    
+    return redirect(url_for('admin.patients'))
+
+@admin_bp.route('/patient/<int:patient_id>/remove', methods=['POST'])
+@admin_required
+def remove_patient(patient_id):
+    """Permanently remove patient from system"""
+    patient = Patient.query.get_or_404(patient_id)
+    user = patient.user
+    
+    try:
+        # Delete patient profile first
+        db.session.delete(patient)
+        # Delete user account
+        db.session.delete(user)
+        db.session.commit()
+        
+        flash(f'✅ Patient "{user.username}" has been permanently removed from the system.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error removing patient: {str(e)}', 'danger')
+    
+    return redirect(url_for('admin.patients'))

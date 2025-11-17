@@ -1,30 +1,145 @@
 {% extends "base.html" %}
 
-{% block title %}Edit Doctor - HMS{% endblock %}
+{% block title %}Edit Doctor Profile - Medicare HMS{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h3 class="mb-0">Edit Doctor</h3>
-            </div>
-            <div class="card-body">
-                <form method="POST">
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" disabled>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow-custom-lg">
+                <div class="card-header bg-primary">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-edit me-2" style="font-size: 1.5rem; color: white;"></i>
+                        <h3 class="mb-0" style="color: white;">Edit Doctor Profile</h3>
                     </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" name="email">
-                    </div>
-                    <div class="mb-3">
-                        <label for="phone" class="form-label">Phone</label>
-                        <input type="text" class="form-control" id="phone" name="phone">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Update</button>
-                </form>
+                    <small style="color: rgba(255,255,255,0.8);">Update doctor information and specialization</small>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <!-- Account Section -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-user-circle me-2 text-primary"></i>Account Information
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label">
+                                                <i class="fas fa-user me-2"></i>Username
+                                            </label>
+                                            <input type="text" class="form-control" value="{{ doctor.user.username }}" disabled>
+                                            <small class="text-muted">Cannot be changed</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label">
+                                                <i class="fas fa-envelope me-2"></i>Email
+                                            </label>
+                                            <input type="email" class="form-control" value="{{ doctor.user.email }}" disabled>
+                                            <small class="text-muted">Cannot be changed</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group mb-0">
+                                    <label class="form-label">
+                                        <i class="fas fa-shield-alt me-2"></i>Account Status
+                                    </label>
+                                    <div class="alert {% if doctor.user.is_active %}alert-success{% else %}alert-danger{% endif %} border-start">
+                                        <strong>{{ 'Active ✓' if doctor.user.is_active else 'Inactive ✗' }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Professional Section -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-stethoscope me-2 text-success"></i>Professional Information
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group mb-3">
+                                    <label for="department_id" class="form-label">
+                                        <i class="fas fa-hospital me-2"></i>Department/Specialization
+                                    </label>
+                                    <select class="form-select" id="department_id" name="department_id" required>
+                                        {% for dept in departments %}
+                                        <option value="{{ dept.id }}" {% if doctor.department_id == dept.id %}selected{% endif %}>
+                                            {{ dept.name }} - {{ dept.description }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label for="license_number" class="form-label">
+                                        <i class="fas fa-certificate me-2"></i>Medical License Number
+                                    </label>
+                                    <input type="text" class="form-control" id="license_number" name="license_number" 
+                                           value="{{ doctor.license_number }}" required>
+                                    <small class="text-muted">Must be unique</small>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="qualification" class="form-label">
+                                                <i class="fas fa-graduation-cap me-2"></i>Qualification
+                                            </label>
+                                            <input type="text" class="form-control" id="qualification" name="qualification" 
+                                                   value="{{ doctor.qualification or '' }}" placeholder="e.g., MBBS, MD">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="specialization" class="form-label">
+                                                <i class="fas fa-heart me-2"></i>Specialization
+                                            </label>
+                                            <input type="text" class="form-control" id="specialization" name="specialization" 
+                                                   value="{{ doctor.specialization or '' }}" placeholder="e.g., Cardiology">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="experience_years" class="form-label">
+                                                <i class="fas fa-briefcase me-2"></i>Years of Experience
+                                            </label>
+                                            <input type="number" class="form-control" id="experience_years" name="experience_years" 
+                                                   value="{{ doctor.experience_years or 0 }}" min="0" max="70">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="phone" class="form-label">
+                                                <i class="fas fa-phone me-2"></i>Contact Phone
+                                            </label>
+                                            <input type="tel" class="form-control" id="phone" name="phone" 
+                                                   value="{{ doctor.phone or '' }}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-grid gap-2 d-sm-flex justify-content-sm-end">
+                            <a href="{{ url_for('admin.doctors') }}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times-circle me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

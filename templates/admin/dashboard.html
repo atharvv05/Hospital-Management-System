@@ -1,71 +1,229 @@
 {% extends "base.html" %}
 
-{% block title %}Admin Dashboard - HMS{% endblock %}
+{% block title %}Admin Dashboard - Medicare HMS{% endblock %}
 
 {% block content %}
 <div class="page-container">
     <div class="container-fluid">
-        <!-- Page Title -->
-        <div class="dashboard-section-title mb-4">
-            <i class="fas fa-chart-line"></i>
-            Admin Dashboard
-        </div>
-
-        <!-- Stats Grid -->
-        <div class="dashboard-grid">
-            <div class="stat-card blue">
-                <div class="stat-card-icon">
-                    <i class="fas fa-stethoscope"></i>
-                </div>
-                <div class="stat-card-value">{{ doctors }}</div>
-                <div class="stat-card-label">Total Doctors</div>
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h2 class="display-6" style="color: var(--primary-blue);">
+                    <i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard
+                </h2>
+                <p class="text-muted">System Overview & Management</p>
             </div>
-
-            <div class="stat-card green">
-                <div class="stat-card-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="stat-card-value">{{ patients }}</div>
-                <div class="stat-card-label">Total Patients</div>
-            </div>
-
-            <div class="stat-card orange">
-                <div class="stat-card-icon">
-                    <i class="fas fa-calendar-check"></i>
-                </div>
-                <div class="stat-card-value">{{ appointments }}</div>
-                <div class="stat-card-label">Total Appointments</div>
+            <div class="col-md-4 text-end">
+                <p class="text-muted"><i class="fas fa-calendar-alt me-2"></i><span id="currentDate"></span></p>
             </div>
         </div>
 
-        <!-- Actions Section -->
-        <div class="dashboard-section">
-            <h5 class="dashboard-section-title">
-                <i class="fas fa-cogs"></i>
-                Quick Actions
-            </h5>
-            <div class="card">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3 col-sm-6 mb-2">
-                            <a href="{{ url_for('admin.doctors') }}" class="btn btn-primary btn-block w-100">
-                                <i class="fas fa-user-md me-2"></i>Manage Doctors
+        <!-- KPI Cards Grid -->
+        <div class="row mb-4">
+            <!-- Total Doctors -->
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card shadow-sm border-left-primary">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">
+                                    <i class="fas fa-stethoscope me-2"></i>Total Doctors
+                                </h6>
+                                <h3 class="mb-0" style="color: var(--primary-blue);">{{ total_doctors }}</h3>
+                                <small class="text-success">
+                                    <i class="fas fa-check-circle"></i> {{ active_doctors }} Active
+                                </small>
+                            </div>
+                            <div style="font-size: 2.5rem; color: rgba(0, 123, 255, 0.2);">
+                                <i class="fas fa-user-md"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <a href="{{ url_for('admin.doctors') }}" class="text-primary text-decoration-none small">
+                            View All <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Patients -->
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card shadow-sm border-left-success">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">
+                                    <i class="fas fa-users me-2"></i>Total Patients
+                                </h6>
+                                <h3 class="mb-0" style="color: #28a745;">{{ total_patients }}</h3>
+                                <small class="text-success">
+                                    <i class="fas fa-check-circle"></i> {{ active_patients }} Active
+                                </small>
+                            </div>
+                            <div style="font-size: 2.5rem; color: rgba(40, 167, 69, 0.2);">
+                                <i class="fas fa-hospital-user"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <a href="{{ url_for('admin.patients') }}" class="text-success text-decoration-none small">
+                            View All <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Appointments -->
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card shadow-sm border-left-warning">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">
+                                    <i class="fas fa-calendar-check me-2"></i>Total Appointments
+                                </h6>
+                                <h3 class="mb-0" style="color: #ffc107;">{{ total_appointments }}</h3>
+                                <small class="text-info">
+                                    <i class="fas fa-arrow-up"></i> {{ upcoming_appointments }} Upcoming
+                                </small>
+                            </div>
+                            <div style="font-size: 2.5rem; color: rgba(255, 193, 7, 0.2);">
+                                <i class="fas fa-calendar"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <a href="{{ url_for('admin.appointments') }}" class="text-warning text-decoration-none small">
+                            View All <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Completed Appointments -->
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card shadow-sm border-left-info">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">
+                                    <i class="fas fa-check-double me-2"></i>Completed
+                                </h6>
+                                <h3 class="mb-0" style="color: #17a2b8;">{{ past_appointments }}</h3>
+                                <small class="text-muted">Past Appointments</small>
+                            </div>
+                            <div style="font-size: 2.5rem; color: rgba(23, 162, 184, 0.2);">
+                                <i class="fas fa-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <a href="{{ url_for('admin.appointments', status='Completed') }}" class="text-info text-decoration-none small">
+                            View All <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department Statistics -->
+        <div class="row mb-4">
+            <div class="col-lg-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">
+                            <i class="fas fa-hospital me-2 text-primary"></i>Department Statistics
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Department</th>
+                                        <th class="text-end">Doctors</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for dept in dept_stats %}
+                                    <tr>
+                                        <td>{{ dept.name }}</td>
+                                        <td class="text-end">
+                                            <span class="badge bg-primary">{{ dept.doctors }}</span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">
+                            <i class="fas fa-cogs me-2 text-primary"></i>Quick Actions
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('admin.add_doctor') }}" class="btn btn-primary">
+                                <i class="fas fa-plus-circle me-2"></i>Add New Doctor
+                            </a>
+                            <a href="{{ url_for('admin.doctors') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-list me-2"></i>Manage Doctors
+                            </a>
+                            <a href="{{ url_for('admin.search_patients') }}" class="btn btn-outline-success">
+                                <i class="fas fa-search me-2"></i>Search Patients
+                            </a>
+                            <a href="{{ url_for('admin.search_doctors') }}" class="btn btn-outline-info">
+                                <i class="fas fa-search me-2"></i>Search Doctors
                             </a>
                         </div>
-                        <div class="col-md-3 col-sm-6 mb-2">
-                            <a href="{{ url_for('admin.patients') }}" class="btn btn-success btn-block w-100">
-                                <i class="fas fa-hospital-user me-2"></i>View Patients
-                            </a>
-                        </div>
-                        <div class="col-md-3 col-sm-6 mb-2">
-                            <a href="{{ url_for('admin.appointments') }}" class="btn btn-warning btn-block w-100">
-                                <i class="fas fa-calendar me-2"></i>View Appointments
-                            </a>
-                        </div>
-                        <div class="col-md-3 col-sm-6 mb-2">
-                            <a href="{{ url_for('admin.search') }}" class="btn btn-info btn-block w-100">
-                                <i class="fas fa-search me-2"></i>Search
-                            </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Management Section -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">
+                            <i class="fas fa-tasks me-2 text-primary"></i>Management Overview
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-3 border-end pb-3 pb-md-0">
+                                <h5>{{ total_doctors }}</h5>
+                                <p class="text-muted small mb-0">Medical Staff</p>
+                                <small class="text-success">
+                                    <i class="fas fa-arrow-up"></i> All Active
+                                </small>
+                            </div>
+                            <div class="col-md-3 border-end pb-3 pb-md-0">
+                                <h5>{{ total_patients }}</h5>
+                                <p class="text-muted small mb-0">Patient Base</p>
+                                <small class="text-success">
+                                    <i class="fas fa-arrow-up"></i> Growing
+                                </small>
+                            </div>
+                            <div class="col-md-3 border-end pb-3 pb-md-0">
+                                <h5>{{ upcoming_appointments }}</h5>
+                                <p class="text-muted small mb-0">Upcoming Bookings</p>
+                                <small class="text-warning">Requires Attention</small>
+                            </div>
+                            <div class="col-md-3">
+                                <h5>{{ past_appointments }}</h5>
+                                <p class="text-muted small mb-0">Completed Sessions</p>
+                                <small class="text-info">Excellent Service</small>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -73,4 +231,29 @@
         </div>
     </div>
 </div>
+
+<style>
+    .border-left-primary {
+        border-left: 4px solid #007bff;
+    }
+    .border-left-success {
+        border-left: 4px solid #28a745;
+    }
+    .border-left-warning {
+        border-left: 4px solid #ffc107;
+    }
+    .border-left-info {
+        border-left: 4px solid #17a2b8;
+    }
+</style>
+
+<script>
+    // Display current date
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    });
+</script>
 {% endblock %}

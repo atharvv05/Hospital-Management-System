@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Search Patients - Medicare HMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-search me-2" style="font-size: 1.5rem; color: white;"></i>
+                        <h3 class="mb-0" style="color: white;">Search Patients</h3>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Search Form -->
+                    <form method="POST" class="mb-4">
+                        <div class="input-group">
+                            <input type="text" name="q" class="form-control form-control-lg" 
+                                   placeholder="Search by name, email, phone, or ID..." value="{{ query }}">
+                            <button class="btn btn-primary btn-lg" type="submit">
+                                <i class="fas fa-search me-2"></i>Search
+                            </button>
+                        </div>
+                        <small class="text-muted d-block mt-2">
+                            💡 Search Tips: Use patient name, email address, phone number, or patient ID
+                        </small>
+                    </form>
+
+                    <!-- Results Section -->
+                    {% if query %}
+                        {% if results %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Phone</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for patient in results %}
+                                        <tr>
+                                            <td><strong>#{{ patient.id }}</strong></td>
+                                            <td>{{ patient.user.username }}</td>
+                                            <td>{{ patient.user.email }}</td>
+                                            <td>{{ patient.phone or 'N/A' }}</td>
+                                            <td>
+                                                {% if patient.user.is_active %}
+                                                    <span class="badge bg-success">Active</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Inactive</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <form method="POST" style="display: inline;">
+                                                    {% if patient.user.is_active %}
+                                                        <button type="submit" formaction="{{ url_for('admin.toggle_patient_status', patient_id=patient.id) }}" 
+                                                                class="btn btn-sm btn-warning" onclick="return confirm('Disable this patient?')">
+                                                            <i class="fas fa-ban me-1"></i>Disable
+                                                        </button>
+                                                    {% else %}
+                                                        <button type="submit" formaction="{{ url_for('admin.toggle_patient_status', patient_id=patient.id) }}" 
+                                                                class="btn btn-sm btn-success">
+                                                            <i class="fas fa-check-circle me-1"></i>Enable
+                                                        </button>
+                                                    {% endif %}
+                                                    <button type="submit" formaction="{{ url_for('admin.remove_patient', patient_id=patient.id) }}" 
+                                                            class="btn btn-sm btn-danger" onclick="return confirm('Permanently remove this patient?')">
+                                                        <i class="fas fa-trash me-1"></i>Remove
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                No patients found matching "{{ query }}". Try a different search term.
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-light">
+                            <i class="fas fa-search me-2"></i>
+                            Enter a search term to find patients by name, email, phone, or ID.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
