@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Book Appointment - HMS{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Book Appointment with {{ doctor.user.username }}</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <p><strong>Doctor:</strong> {{ doctor.user.username }}</p>
+                    <p><strong>Department:</strong> {{ doctor.department.name }}</p>
+                    <p><strong>Experience:</strong> {{ doctor.experience_years }} years</p>
+                </div>
+
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="appointment_date" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="appointment_date" name="appointment_date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="appointment_time" class="form-label">Time</label>
+                        <input type="time" class="form-control" id="appointment_time" name="appointment_time" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Book Appointment</button>
+                    <a href="{{ url_for('patient.dashboard') }}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Registration Successful - Medicare HMS{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <!-- Success Card -->
+                <div class="card shadow-custom-lg border-0 text-center">
+                    <div class="card-body p-5">
+                        <!-- Success Icon -->
+                        <div class="mb-4">
+                            <div style="display: inline-block; width: 80px; height: 80px; 
+                                     background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                                     border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-check" style="font-size: 3rem; color: white;"></i>
+                            </div>
+                        </div>
+
+                        <!-- Success Message -->
+                        <h2 class="mb-2" style="color: #28a745;">
+                            <i class="fas fa-check-circle me-2"></i>Account Created Successfully!
+                        </h2>
+                        <p class="text-muted mb-4" style="font-size: 1.1rem;">
+                            Your Medicare HMS account has been created successfully.
+                        </p>
+
+                        <!-- Account Details -->
+                        <div class="alert alert-light border-start border-success border-5 text-start mb-4">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <p class="mb-1"><small class="text-muted">Username</small></p>
+                                    <p class="fw-bold text-primary" style="font-size: 1.05rem;">{{ username }}</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <p class="mb-1"><small class="text-muted">Role</small></p>
+                                    <p class="fw-bold">
+                                        {% if role == 'patient' %}
+                                            <span class="badge badge-success" style="background-color: #28a745; font-size: 0.9rem; padding: 0.5rem 0.75rem;">
+                                                <i class="fas fa-hospital-user me-1"></i>Patient
+                                            </span>
+                                        {% elif role == 'doctor' %}
+                                            <span class="badge badge-primary" style="background-color: #0066cc; font-size: 0.9rem; padding: 0.5rem 0.75rem;">
+                                                <i class="fas fa-user-md me-1"></i>Doctor
+                                            </span>
+                                        {% elif role == 'admin' %}
+                                            <span class="badge" style="background-color: #dc3545; color: white; font-size: 0.9rem; padding: 0.5rem 0.75rem;">
+                                                <i class="fas fa-user-shield me-1"></i>Administrator
+                                            </span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="mb-1"><small class="text-muted">Email</small></p>
+                                    <p class="fw-bold text-primary" style="font-size: 0.95rem;">{{ email }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="mb-1"><small class="text-muted">Status</small></p>
+                                    <p class="fw-bold">
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check-circle me-1"></i>Active
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Next Steps -->
+                        <div class="mb-4">
+                            <h6 class="mb-3 text-muted">
+                                <i class="fas fa-tasks me-2"></i>Next Steps:
+                            </h6>
+                            <ol class="text-start" style="font-size: 0.95rem;">
+                                <li class="mb-2">Click the button below to proceed to login</li>
+                                <li class="mb-2">Enter your username and password</li>
+                                <li class="mb-2">Select your role again for security verification</li>
+                                <li>Access your personalized dashboard</li>
+                            </ol>
+                        </div>
+
+                        <!-- Call to Action Buttons -->
+                        <div class="d-grid gap-2">
+                            <a id="proceed-btn" href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>Proceed to Login
+                            </a>
+                            <a href="{{ url_for('auth.register') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-user-plus me-2"></i>Create Another Account
+                            </a>
+                        </div>
+
+                        <!-- Redirect Notice -->
+                        <div class="mt-3 text-muted">
+                            You will be redirected to the login page in <span id="countdown">6</span> seconds.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Box -->
+                <div class="alert alert-info mt-4 text-start">
+                    <i class="fas fa-shield-alt me-2"></i>
+                    <strong>Security Note:</strong> Keep your credentials secure. Never share your password with anyone. 
+                    Medicare HMS support team will never ask for your password.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .badge-success {
+        background-color: #d4edda !important;
+        color: #155724 !important;
+        border: 1px solid #c3e6cb;
+    }
+</style>
+<script>
+    // Auto-redirect countdown
+    (function(){
+        var seconds = 6;
+        var countdownEl = document.getElementById('countdown');
+        var proceedUrl = "{{ url_for('auth.login') }}";
+
+        if (!countdownEl) return;
+
+        var interval = setInterval(function(){
+            seconds -= 1;
+            countdownEl.textContent = seconds;
+            if (seconds <= 0) {
+                clearInterval(interval);
+                window.location.href = proceedUrl;
+            }
+        }, 1000);
+    })();
+</script>
+{% endblock %}

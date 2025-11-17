@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}My Appointments - HMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2>My Appointments</h2>
+    </div>
+</div>
+
+{% if appointments %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Doctor</th>
+                <th>Department</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for appointment in appointments %}
+            <tr>
+                <td>{{ appointment.doctor.user.username }}</td>
+                <td>{{ appointment.doctor.department.name }}</td>
+                <td>{{ appointment.appointment_date }}</td>
+                <td>{{ appointment.appointment_time }}</td>
+                <td>
+                    {% if appointment.status == 'Booked' %}
+                    <span class="badge bg-info">{{ appointment.status }}</span>
+                    {% elif appointment.status == 'Completed' %}
+                    <span class="badge bg-success">{{ appointment.status }}</span>
+                    {% else %}
+                    <span class="badge bg-danger">{{ appointment.status }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if appointment.status == 'Booked' %}
+                    <a href="{{ url_for('patient.cancel_appointment', appointment_id=appointment.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Cancel this appointment?')">Cancel</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info">You have no appointments yet. <a href="{{ url_for('patient.dashboard') }}">Book one now</a>!</div>
+{% endif %}
+{% endblock %}

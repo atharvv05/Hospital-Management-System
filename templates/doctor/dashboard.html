@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Doctor Dashboard - HMS{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="container-fluid">
+        <!-- Page Title -->
+        <div class="dashboard-section-title mb-4">
+            <i class="fas fa-hospital-user"></i>
+            Doctor Dashboard
+        </div>
+
+        <!-- Doctor Profile Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-user-md me-2"></i>Profile Information
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong class="text-primary"><i class="fas fa-user me-2"></i>Name:</strong> {{ doctor.user.username }}</p>
+                        <p><strong class="text-primary"><i class="fas fa-hospital me-2"></i>Department:</strong> {{ doctor.department.name }}</p>
+                        <p><strong class="text-primary"><i class="fas fa-briefcase me-2"></i>Experience:</strong> {{ doctor.experience_years }} years</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong class="text-primary"><i class="fas fa-phone me-2"></i>Phone:</strong> {{ doctor.phone }}</p>
+                        <p><strong class="text-primary"><i class="fas fa-envelope me-2"></i>Email:</strong> {{ doctor.user.email }}</p>
+                        <p><strong class="text-primary"><i class="fas fa-star me-2"></i>Rating:</strong> 
+                            <span class="badge badge-primary">{{ doctor.rating|default(0) }}/5</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="dashboard-grid">
+            <div class="stat-card blue">
+                <div class="stat-card-icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stat-card-value">{{ appointments|length }}</div>
+                <div class="stat-card-label">Total Appointments</div>
+            </div>
+
+            <div class="stat-card green">
+                <div class="stat-card-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-card-value">{{ appointments|selectattr('status', 'equalto', 'Completed')|list|length }}</div>
+                <div class="stat-card-label">Completed</div>
+            </div>
+
+            <div class="stat-card orange">
+                <div class="stat-card-icon">
+                    <i class="fas fa-calendar"></i>
+                </div>
+                <div class="stat-card-value">{{ appointments|selectattr('status', 'equalto', 'Booked')|list|length }}</div>
+                <div class="stat-card-label">Upcoming</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="dashboard-section">
+            <h5 class="dashboard-section-title">
+                <i class="fas fa-lightning"></i>
+                Quick Actions
+            </h5>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 col-sm-6 mb-2">
+                            <a href="{{ url_for('doctor.appointments') }}" class="btn btn-primary btn-block w-100">
+                                <i class="fas fa-calendar me-2"></i>View Appointments
+                            </a>
+                        </div>
+                        <div class="col-md-4 col-sm-6 mb-2">
+                            <a href="{{ url_for('doctor.patients') }}" class="btn btn-success btn-block w-100">
+                                <i class="fas fa-users me-2"></i>View Patients
+                            </a>
+                        </div>
+                        <div class="col-md-4 col-sm-6 mb-2">
+                            <a href="{{ url_for('doctor.profile') }}" class="btn btn-warning btn-block w-100">
+                                <i class="fas fa-edit me-2"></i>Edit Profile
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

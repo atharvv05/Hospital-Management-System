@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Treatment History - HMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2>Treatment History</h2>
+    </div>
+</div>
+
+{% if treatments %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Doctor</th>
+                <th>Date</th>
+                <th>Diagnosis</th>
+                <th>Prescription</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for treatment in treatments %}
+            <tr>
+                <td>{{ treatment.doctor.user.username }}</td>
+                <td>{{ treatment.created_at.strftime('%Y-%m-%d') }}</td>
+                <td>{{ treatment.diagnosis[:50] }}...</td>
+                <td>{{ treatment.prescription[:50] }}...</td>
+                <td>{{ treatment.notes[:50] or 'N/A' }}...</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info">No treatment history yet.</div>
+{% endif %}
+{% endblock %}

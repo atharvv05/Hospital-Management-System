@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Medicare HMS{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow-custom-lg">
+                    <div class="card-header">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-user-plus me-2" style="font-size: 1.5rem;"></i>
+                            <h3 class="mb-0">Create Your Account</h3>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST">
+                            <!-- Username -->
+                            <div class="form-group">
+                                <label for="username" class="form-label">
+                                    <i class="fas fa-user me-2"></i>Username
+                                </label>
+                                <input type="text" class="form-control" id="username" name="username" 
+                                       placeholder="Enter your username" required>
+                                <small class="text-muted">Choose a unique username for login</small>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="form-group">
+                                <label for="email" class="form-label">
+                                    <i class="fas fa-envelope me-2"></i>Email Address
+                                </label>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       placeholder="Enter your email" required>
+                            </div>
+
+                            <!-- Role Selection -->
+                            <div class="form-group">
+                                <label for="role" class="form-label">
+                                    <i class="fas fa-user-tag me-2"></i>Select Your Role
+                                </label>
+                                <select class="form-select" id="role" name="role" required onchange="toggleDepartmentField()">
+                                    <option value="">-- Choose Your Role --</option>
+                                    <option value="patient">Patient - Book appointments & view medical records</option>
+                                    <option value="doctor">Doctor - Manage appointments & patients</option>
+                                    <option value="admin">Administrator - Full system management</option>
+                                </select>
+                                <small class="text-muted d-block mt-2">
+                                    <strong>Patient:</strong> Book appointments, view treatments<br>
+                                    <strong>Doctor:</strong> Manage your appointments and patient records<br>
+                                    <strong>Admin:</strong> Manage doctors, patients, and system
+                                </small>
+                            </div>
+
+                            <!-- Department Selection (for Doctors) -->
+                            <div class="form-group" id="department-field" style="display: none;">
+                                <label for="department" class="form-label">
+                                    <i class="fas fa-hospital me-2"></i>Department/Specialization
+                                </label>
+                                <select class="form-select" id="department" name="department_id">
+                                    <option value="">-- Select Your Department --</option>
+                                    {% for dept in departments %}
+                                    <option value="{{ dept.id }}">{{ dept.name }} - {{ dept.description }}</option>
+                                    {% endfor %}
+                                </select>
+                                <small class="text-muted">Required for doctors to specify their specialization</small>
+                            </div>
+
+                            <!-- Password -->
+                            <div class="form-group">
+                                <label for="password" class="form-label">
+                                    <i class="fas fa-lock me-2"></i>Password
+                                </label>
+                                <input type="password" class="form-control" id="password" name="password" 
+                                       placeholder="Enter a strong password" required>
+                                <small class="text-muted">Minimum 8 characters recommended</small>
+                            </div>
+
+                            <!-- Confirm Password -->
+                            <div class="form-group">
+                                <label for="confirm_password" class="form-label">
+                                    <i class="fas fa-lock me-2"></i>Confirm Password
+                                </label>
+                                <input type="password" class="form-control" id="confirm_password" name="confirm_password" 
+                                       placeholder="Re-enter your password" required>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn btn-primary w-100 btn-lg mt-3">
+                                <i class="fas fa-check-circle me-2"></i>Create Account
+                            </button>
+                        </form>
+
+                        <hr class="divider">
+
+                        <!-- Login Link -->
+                        <p class="text-center mb-0">
+                            Already have an account? 
+                            <a href="{{ url_for('auth.login') }}" class="text-primary fw-bold">
+                                <i class="fas fa-sign-in-alt me-1"></i>Login here
+                            </a>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Info Box -->
+                <div class="alert alert-info mt-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Note:</strong> Choose your role wisely. Your account type determines the features you can access.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleDepartmentField() {
+        const role = document.getElementById('role').value;
+        const deptField = document.getElementById('department-field');
+        const deptSelect = document.getElementById('department');
+        
+        if (role === 'doctor') {
+            deptField.style.display = 'block';
+            deptSelect.required = true;
+        } else {
+            deptField.style.display = 'none';
+            deptSelect.required = false;
+            deptSelect.value = '';
+        }
+    }
+</script>
+{% endblock %}

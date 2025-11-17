@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Search Doctors - HMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2>Available Doctors</h2>
+    </div>
+</div>
+
+{% if doctors %}
+<div class="row">
+    {% for doctor in doctors %}
+    <div class="col-md-6 mb-3">
+        <div class="card shadow">
+            <div class="card-body">
+                <h5 class="card-title">{{ doctor.user.username }}</h5>
+                <p><strong>Department:</strong> {{ doctor.department.name }}</p>
+                <p><strong>Experience:</strong> {{ doctor.experience_years }} years</p>
+                <p><strong>Phone:</strong> {{ doctor.phone }}</p>
+                {% if doctor.bio %}
+                <p><strong>Bio:</strong> {{ doctor.bio }}</p>
+                {% endif %}
+                <a href="{{ url_for('patient.book_appointment', doctor_id=doctor.id) }}" class="btn btn-primary">Book Appointment</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">No doctors found in this department.</div>
+{% endif %}
+{% endblock %}

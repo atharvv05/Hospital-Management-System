@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Search - HMS{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2>Search</h2>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <form method="POST" class="card p-4 shadow">
+            <div class="mb-3">
+                <label for="search_type" class="form-label">Search Type</label>
+                <select class="form-control" id="search_type" name="search_type" required>
+                    <option value="doctor">Doctor</option>
+                    <option value="patient">Patient</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="query" class="form-label">Search Query</label>
+                <input type="text" class="form-control" id="query" name="query" placeholder="Enter name..." required>
+            </div>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+    </div>
+</div>
+
+{% if query %}
+<div class="row">
+    <div class="col-md-12">
+        <h3>Results for "{{ query }}" ({{ search_type }})</h3>
+        {% if results %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        {% if search_type == 'doctor' %}
+                        <th>Department</th>
+                        <th>Experience</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if search_type == 'doctor' %}
+                        {% for doctor in results %}
+                        <tr>
+                            <td>{{ doctor.id }}</td>
+                            <td>{{ doctor.user.username }}</td>
+                            <td>{{ doctor.user.email }}</td>
+                            <td>{{ doctor.phone }}</td>
+                            <td>{{ doctor.department.name }}</td>
+                            <td>{{ doctor.experience_years }} years</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        {% for patient in results %}
+                        <tr>
+                            <td>{{ patient.id }}</td>
+                            <td>{{ patient.user.username }}</td>
+                            <td>{{ patient.user.email }}</td>
+                            <td>{{ patient.phone }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">No results found.</div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

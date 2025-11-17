@@ -1,0 +1,475 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Medicare HMS{% endblock %}
+
+{% block content %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #0066cc 0%, #17a2b8 100%);
+        color: white;
+        padding: 100px 0;
+        text-align: center;
+        clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+    }
+
+    .hero-content h1 {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .hero-content p {
+        font-size: 1.3rem;
+        margin-bottom: 40px;
+        opacity: 0.95;
+    }
+
+    .btn-hero {
+        padding: 12px 35px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+        margin: 0 10px;
+    }
+
+    .btn-hero-primary {
+        background-color: white;
+        color: #0066cc;
+    }
+
+    .btn-hero-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .btn-hero-secondary {
+        background-color: transparent;
+        color: white;
+        border: 2px solid white;
+    }
+
+    .btn-hero-secondary:hover {
+        background-color: white;
+        color: #0066cc;
+        transform: translateY(-3px);
+    }
+
+    .features-section {
+        padding: 80px 0;
+        background-color: #f8f9fa;
+    }
+
+    .feature-card {
+        background: white;
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        text-align: center;
+        height: 100%;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+
+    .feature-card i {
+        font-size: 3rem;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #0066cc 0%, #17a2b8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .feature-card h4 {
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+        color: #333;
+    }
+
+    .feature-card p {
+        color: #666;
+        line-height: 1.6;
+    }
+
+    .stats-section {
+        background: linear-gradient(135deg, #0066cc 0%, #17a2b8 100%);
+        color: white;
+        padding: 60px 0;
+        text-align: center;
+    }
+
+    .stat-item {
+        padding: 30px;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        display: block;
+    }
+
+    .stat-label {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .role-section {
+        padding: 80px 0;
+    }
+
+    .role-card {
+        background: white;
+        border-left: 5px solid #0066cc;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        margin-bottom: 30px;
+        transition: all 0.3s ease;
+    }
+
+    .role-card.doctor {
+        border-left-color: #17a2b8;
+    }
+
+    .role-card.admin {
+        border-left-color: #28a745;
+    }
+
+    .role-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+    }
+
+    .role-card h5 {
+        font-size: 1.4rem;
+        margin-bottom: 15px;
+        color: #333;
+    }
+
+    .role-card ul {
+        list-style: none;
+        padding: 0;
+        color: #666;
+    }
+
+    .role-card li {
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .role-card li:last-child {
+        border-bottom: none;
+    }
+
+    .role-card li:before {
+        content: "✓ ";
+        color: #28a745;
+        font-weight: bold;
+        margin-right: 10px;
+    }
+
+    .cta-section {
+        background: linear-gradient(135deg, #0066cc 0%, #17a2b8 100%);
+        color: white;
+        padding: 80px 0;
+        text-align: center;
+    }
+
+    .cta-section h2 {
+        font-size: 2.5rem;
+        margin-bottom: 30px;
+    }
+
+    .cta-section p {
+        font-size: 1.2rem;
+        margin-bottom: 40px;
+        opacity: 0.95;
+    }
+
+    .btn-cta {
+        padding: 15px 40px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 50px;
+        background-color: white;
+        color: #0066cc;
+        border: none;
+        transition: all 0.3s ease;
+        margin: 0 10px;
+    }
+
+    .btn-cta:hover {
+        transform: scale(1.05);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .testimonial-section {
+        padding: 80px 0;
+        background-color: #f8f9fa;
+    }
+
+    .testimonial-card {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        margin-bottom: 30px;
+    }
+
+    .testimonial-text {
+        color: #666;
+        font-style: italic;
+        margin-bottom: 20px;
+        line-height: 1.8;
+    }
+
+    .testimonial-author {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .testimonial-role {
+        color: #0066cc;
+        font-size: 0.9rem;
+    }
+
+    .stars {
+        color: #ffc107;
+        margin-bottom: 10px;
+    }
+</style>
+
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <h1>Welcome to Medicare HMS</h1>
+            <p>Professional Healthcare Management System for Modern Hospitals & Clinics</p>
+            <div>
+                {% if current_user.is_authenticated %}
+                    <a href="{% if current_user.role == 'admin' %}{{ url_for('admin.dashboard') }}{% elif current_user.role == 'doctor' %}{{ url_for('doctor.dashboard') }}{% else %}{{ url_for('patient.dashboard') }}{% endif %}" class="btn btn-hero btn-hero-primary">
+                        <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-hero btn-hero-primary">
+                        <i class="fas fa-user-plus me-2"></i>Get Started
+                    </a>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-hero btn-hero-secondary">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login Now
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="features-section">
+    <div class="container">
+        <h2 class="text-center mb-5" style="font-size: 2.5rem; color: #333;">Key Features</h2>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <i class="fas fa-calendar-check"></i>
+                    <h4>Smart Appointment System</h4>
+                    <p>Book, manage, and reschedule appointments with ease. Real-time availability and automated confirmations.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <i class="fas fa-users"></i>
+                    <h4>Multi-Role Access</h4>
+                    <p>Secure role-based access for Patients, Doctors, and Administrators. Each with their own customized dashboard.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <i class="fas fa-file-medical"></i>
+                    <h4>Medical Records</h4>
+                    <p>Comprehensive patient medical history, treatment records, and prescription management all in one place.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <i class="fas fa-lock"></i>
+                    <h4>HIPAA Compliant</h4>
+                    <p>Enterprise-grade security with encrypted data storage and secure user authentication protocols.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <i class="fas fa-hospital"></i>
+                    <h4>Department Management</h4>
+                    <p>Organize doctors and specialists across multiple departments for better patient care coordination.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h4>Analytics & Reports</h4>
+                    <p>Generate detailed reports and analytics for hospital operations and patient care insights.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Section -->
+<div class="stats-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3 col-6">
+                <div class="stat-item">
+                    <span class="stat-number">500+</span>
+                    <span class="stat-label">Healthcare Providers</span>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stat-item">
+                    <span class="stat-number">50K+</span>
+                    <span class="stat-label">Active Patients</span>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stat-item">
+                    <span class="stat-number">100K+</span>
+                    <span class="stat-label">Appointments</span>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stat-item">
+                    <span class="stat-number">99.9%</span>
+                    <span class="stat-label">Uptime</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Roles Section -->
+<div class="role-section">
+    <div class="container">
+        <h2 class="text-center mb-5" style="font-size: 2.5rem; color: #333;">Different Roles, Different Powers</h2>
+        <div class="row">
+            <div class="col-md-6 col-lg-4">
+                <div class="role-card">
+                    <div style="font-size: 2.5rem; color: #28a745; margin-bottom: 15px;">
+                        <i class="fas fa-hospital-user"></i>
+                    </div>
+                    <h5>For Patients</h5>
+                    <ul>
+                        <li>Book appointments with specialists</li>
+                        <li>View medical history and prescriptions</li>
+                        <li>Receive appointment reminders</li>
+                        <li>Track treatment progress</li>
+                        <li>Manage health records securely</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="role-card doctor">
+                    <div style="font-size: 2.5rem; color: #17a2b8; margin-bottom: 15px;">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                    <h5>For Doctors</h5>
+                    <ul>
+                        <li>Manage patient appointments</li>
+                        <li>View comprehensive patient history</li>
+                        <li>Prescribe treatments and medicines</li>
+                        <li>Update availability schedule</li>
+                        <li>Generate medical reports</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="role-card admin">
+                    <div style="font-size: 2.5rem; color: #0066cc; margin-bottom: 15px;">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <h5>For Administrators</h5>
+                    <ul>
+                        <li>Manage hospital staff and departments</li>
+                        <li>Monitor system performance</li>
+                        <li>Generate hospital reports</li>
+                        <li>Handle user management</li>
+                        <li>Configure system settings</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Testimonials Section -->
+<div class="testimonial-section">
+    <div class="container">
+        <h2 class="text-center mb-5" style="font-size: 2.5rem; color: #333;">What Users Say</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="testimonial-text">"Medicare HMS has revolutionized how we manage patient appointments. The system is intuitive and incredibly efficient!"</p>
+                    <p class="testimonial-author">Dr. Rajesh Kumar</p>
+                    <p class="testimonial-role">Cardiology Specialist</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="testimonial-text">"As a patient, I love how easy it is to book appointments and access my medical records. Great experience!"</p>
+                    <p class="testimonial-author">Priya Sharma</p>
+                    <p class="testimonial-role">Patient</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="testimonial-text">"The admin panel gives us complete control over hospital operations. Outstanding support and documentation!"</p>
+                    <p class="testimonial-author">Arjun Singh</p>
+                    <p class="testimonial-role">Hospital Administrator</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="cta-section">
+    <div class="container">
+        <h2>Ready to Transform Your Healthcare?</h2>
+        <p>Join hundreds of healthcare providers using Medicare HMS today</p>
+        {% if not current_user.is_authenticated %}
+            <a href="{{ url_for('auth.register') }}" class="btn btn-cta">
+                <i class="fas fa-user-plus me-2"></i>Create Account Now
+            </a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-cta">
+                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

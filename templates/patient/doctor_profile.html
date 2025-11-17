@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Doctor Profile - HMS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>{{ doctor.user.username }}</h2>
+        <div class="card shadow">
+            <div class="card-body">
+                <p><strong>Department:</strong> {{ doctor.department.name }}</p>
+                <p><strong>Experience:</strong> {{ doctor.experience_years }} years</p>
+                <p><strong>Phone:</strong> {{ doctor.phone }}</p>
+                <p><strong>Email:</strong> {{ doctor.user.email }}</p>
+                {% if doctor.bio %}
+                <p><strong>Bio:</strong> {{ doctor.bio }}</p>
+                {% endif %}
+                <a href="{{ url_for('patient.book_appointment', doctor_id=doctor.id) }}" class="btn btn-primary">Book Appointment</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

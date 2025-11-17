@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Dashboard - HMS{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="container-fluid">
+        <!-- Page Title -->
+        <div class="dashboard-section-title mb-4">
+            <i class="fas fa-heartbeat"></i>
+            Patient Dashboard
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="dashboard-grid">
+            <div class="stat-card blue">
+                <div class="stat-card-icon">
+                    <i class="fas fa-calendar"></i>
+                </div>
+                <div class="stat-card-value" id="upcoming-count">0</div>
+                <div class="stat-card-label">Upcoming Appointments</div>
+            </div>
+
+            <div class="stat-card green">
+                <div class="stat-card-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-card-value" id="completed-count">0</div>
+                <div class="stat-card-label">Completed Visits</div>
+            </div>
+
+            <div class="stat-card orange">
+                <div class="stat-card-icon">
+                    <i class="fas fa-file-medical"></i>
+                </div>
+                <div class="stat-card-value" id="treatments-count">0</div>
+                <div class="stat-card-label">Medical Records</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="dashboard-section">
+            <h5 class="dashboard-section-title">
+                <i class="fas fa-lightning"></i>
+                Quick Actions
+            </h5>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 col-sm-6 mb-2">
+                            <a href="{{ url_for('patient.search_doctors') }}" class="btn btn-primary btn-block w-100">
+                                <i class="fas fa-search me-2"></i>Search Doctors
+                            </a>
+                        </div>
+                        <div class="col-md-4 col-sm-6 mb-2">
+                            <a href="{{ url_for('patient.my_appointments') }}" class="btn btn-success btn-block w-100">
+                                <i class="fas fa-calendar-check me-2"></i>My Appointments
+                            </a>
+                        </div>
+                        <div class="col-md-4 col-sm-6 mb-2">
+                            <a href="{{ url_for('patient.treatment_history') }}" class="btn btn-warning btn-block w-100">
+                                <i class="fas fa-history me-2"></i>Medical History
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Browse by Department -->
+        <div class="dashboard-section">
+            <h5 class="dashboard-section-title">
+                <i class="fas fa-hospital"></i>
+                Browse by Department
+            </h5>
+            <div class="row">
+                {% for dept in departments %}
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <a href="{{ url_for('patient.search_doctors', department_id=dept.id) }}" class="card text-decoration-none h-100">
+                        <div class="card-body text-center">
+                            <div style="font-size: 2.5rem; color: var(--primary-blue); margin-bottom: 0.5rem;">
+                                <i class="fas fa-clinic-medical"></i>
+                            </div>
+                            <h5 class="card-title">{{ dept.name }}</h5>
+                            <p class="text-muted" style="font-size: 0.9rem;">Click to view doctors</p>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Profile Quick Info -->
+        <div class="dashboard-section">
+            <h5 class="dashboard-section-title">
+                <i class="fas fa-user"></i>
+                Your Profile
+            </h5>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong class="text-primary"><i class="fas fa-envelope me-2"></i>Email:</strong> {{ user.email }}</p>
+                            <p><strong class="text-primary"><i class="fas fa-phone me-2"></i>Phone:</strong> {{ patient.phone|default('Not provided') }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{{ url_for('patient.profile') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-edit me-2"></i>Edit Profile
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Simple stats calculation (optional - can be enhanced with actual counts from backend)
+document.addEventListener('DOMContentLoaded', function() {
+    // You can make AJAX calls here to get actual counts
+    // For now, using placeholder values
+});
+</script>
+{% endblock %}
