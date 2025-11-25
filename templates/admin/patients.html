@@ -77,6 +77,10 @@
                                         <small>{{ patient.created_at.strftime('%Y-%m-%d') if patient.created_at else 'N/A' }}</small>
                                     </td>
                                     <td>
+                                        <a href="{{ url_for('admin.patient_treatments', patient_id=patient.id) }}" 
+                                           class="btn btn-sm btn-info me-1" title="View Treatment History">
+                                            <i class="fas fa-file-medical"></i>
+                                        </a>
                                         <form method="POST" style="display: inline;">
                                             {% if patient.user.is_active %}
                                                 <button type="submit" formaction="{{ url_for('admin.toggle_patient_status', patient_id=patient.id) }}" 

@@ -6,6 +6,7 @@ from models.doctor import Doctor
 from models.patient import Patient
 from models.appointment import Appointment
 from models.department import Department
+from models.treatment import Treatment
 from datetime import datetime
 from sqlalchemy import or_, and_
 
@@ -48,6 +49,9 @@ def dashboard():
     # Get active patients (is_active = True)
     active_patients = Patient.query.join(User).filter(User.is_active == True).count()
     
+    # Total treatments
+    total_treatments = Treatment.query.count()
+    
     # Department statistics
     departments = Department.query.all()
     dept_stats = []
@@ -66,6 +70,7 @@ def dashboard():
                          total_appointments=total_appointments,
                          upcoming_appointments=upcoming_appointments,
                          past_appointments=past_appointments,
+                         total_treatments=total_treatments,
                          dept_stats=dept_stats)
 
 @admin_bp.route('/doctors')
@@ -355,3 +360,23 @@ def remove_patient(patient_id):
         flash(f'Error removing patient: {str(e)}', 'danger')
     
     return redirect(url_for('admin.patients'))
+
+@admin_bp.route('/patient/<int:patient_id>/treatments')
+@login_required
+@admin_required
+def patient_treatments(patient_id):
+    """View all treatment records for a specific patient"""
+    patient = Patient.query.get_or_404(patient_id)
+    treatments = Treatment.query.filter_by(patient_id=patient_id).order_by(Treatment.created_at.desc()).all()
+    
+    return render_template('admin/patient_treatments.html', patient=patient, treatments=treatments)
+
+@admin_bp.route('/treatments')
+@login_required
+@admin_required
+def all_treatments():
+    """View all treatment records in the system"""
+    page = request.args.get('page', 1, type=int)
+    treatments = Treatment.query.order_by(Treatment.created_at.desc()).paginate(page=page, per_page=15)
+    
+    return render_template('admin/treatments.html', treatments=treatments)

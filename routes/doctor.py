@@ -85,6 +85,26 @@ def patients():
     
     return render_template('doctor/patients.html', patients=patients)
 
+@doctor_bp.route('/patient/<int:patient_id>/history')
+@login_required
+@doctor_required
+def patient_history(patient_id):
+    """View a patient's complete treatment history (only for patients who have appointments with this doctor)"""
+    doctor = Doctor.query.filter_by(user_id=current_user.id).first()
+    patient = Patient.query.get_or_404(patient_id)
+    
+    # Verify doctor has treated this patient
+    has_appointment = Appointment.query.filter_by(doctor_id=doctor.id, patient_id=patient_id).first()
+    if not has_appointment:
+        flash('You can only view history for your own patients.', 'danger')
+        return redirect(url_for('doctor.patients'))
+    
+    # Get all treatments for this patient (from all doctors)
+    treatments = Treatment.query.filter_by(patient_id=patient_id).order_by(Treatment.created_at.desc()).all()
+    appointments = Appointment.query.filter_by(patient_id=patient_id).order_by(Appointment.appointment_date.desc()).all()
+    
+    return render_template('doctor/patient_history.html', patient=patient, treatments=treatments, appointments=appointments)
+
 @doctor_bp.route('/profile', methods=['GET', 'POST'])
 @login_required
 @doctor_required

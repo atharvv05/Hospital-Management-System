@@ -50,6 +50,7 @@ def book_appointment(doctor_id):
         appointment_date = request.form.get('appointment_date')
         appointment_time = request.form.get('appointment_time')
         
+        # Conflict prevention: Check for double booking
         existing = Appointment.query.filter_by(
             doctor_id=doctor_id,
             appointment_date=appointment_date,
@@ -58,7 +59,7 @@ def book_appointment(doctor_id):
         ).first()
         
         if existing:
-            flash('Time slot already booked', 'danger')
+            flash('⚠️ Time slot already booked for this doctor. Please choose another time.', 'danger')
             return redirect(url_for('patient.book_appointment', doctor_id=doctor_id))
         
         appointment = Appointment(patient_id=patient.id,
@@ -128,6 +129,19 @@ def reschedule_appointment(appointment_id):
         # Validate date and time
         if not new_date or not new_time:
             flash('Please select a valid date and time', 'danger')
+            return redirect(url_for('patient.reschedule_appointment', appointment_id=appointment_id))
+        
+        # Check for double booking - prevent conflict
+        existing = Appointment.query.filter(
+            Appointment.doctor_id == appointment.doctor_id,
+            Appointment.appointment_date == new_date,
+            Appointment.appointment_time == new_time,
+            Appointment.status == 'Booked',
+            Appointment.id != appointment_id  # Exclude current appointment
+        ).first()
+        
+        if existing:
+            flash(f'⚠️ Time slot {new_time} on {new_date} is already booked for this doctor. Please choose another time.', 'danger')
             return redirect(url_for('patient.reschedule_appointment', appointment_id=appointment_id))
         
         try:
