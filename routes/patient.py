@@ -103,6 +103,48 @@ def cancel_appointment(appointment_id):
     flash('Appointment cancelled', 'success')
     return redirect(url_for('patient.my_appointments'))
 
+@patient_bp.route('/reschedule-appointment/<int:appointment_id>', methods=['GET', 'POST'])
+@login_required
+@patient_required
+def reschedule_appointment(appointment_id):
+    """Allow patient to reschedule their appointment to a different date/time"""
+    appointment = Appointment.query.get_or_404(appointment_id)
+    doctor = appointment.doctor
+    
+    # Check if appointment belongs to current patient
+    if appointment.patient.user_id != current_user.id:
+        flash('You do not have permission to reschedule this appointment', 'danger')
+        return redirect(url_for('patient.my_appointments'))
+    
+    # Can only reschedule Booked appointments (not Completed or Cancelled)
+    if appointment.status != 'Booked':
+        flash('Only booked appointments can be rescheduled', 'warning')
+        return redirect(url_for('patient.my_appointments'))
+    
+    if request.method == 'POST':
+        new_date = request.form.get('new_date')
+        new_time = request.form.get('new_time')
+        
+        # Validate date and time
+        if not new_date or not new_time:
+            flash('Please select a valid date and time', 'danger')
+            return redirect(url_for('patient.reschedule_appointment', appointment_id=appointment_id))
+        
+        try:
+            # Update appointment
+            appointment.appointment_date = new_date
+            appointment.appointment_time = new_time
+            db.session.commit()
+            
+            flash(f'✅ Appointment rescheduled successfully to {new_date} at {new_time}', 'success')
+            return redirect(url_for('patient.my_appointments'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error rescheduling appointment: {str(e)}', 'danger')
+            return redirect(url_for('patient.reschedule_appointment', appointment_id=appointment_id))
+    
+    return render_template('patient/reschedule_appointment.html', appointment=appointment, doctor=doctor)
+
 @patient_bp.route('/profile', methods=['GET', 'POST'])
 @login_required
 @patient_required

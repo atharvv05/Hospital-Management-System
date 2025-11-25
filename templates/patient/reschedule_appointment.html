@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Reschedule Appointment - Medicare HMS{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary">
+                    <h4 class="mb-0" style="color: white;">
+                        <i class="fas fa-calendar-alt me-2"></i>Reschedule Appointment
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Current Appointment Info -->
+                    <div class="alert alert-info mb-4">
+                        <h6 class="mb-2">
+                            <i class="fas fa-info-circle me-2"></i>Current Appointment Details
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1">
+                                    <strong>Doctor:</strong> Dr. {{ doctor.user.username }}<br>
+                                    <strong>Specialization:</strong> {{ doctor.specialization }}<br>
+                                    <strong>Department:</strong> {{ doctor.user.doctor_profile.department.name if doctor.user.doctor_profile else 'N/A' }}
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1">
+                                    <strong>Current Date:</strong> {{ appointment.appointment_date | strftime('%d %b %Y') }}<br>
+                                    <strong>Current Time:</strong> {{ appointment.appointment_time }}<br>
+                                    <strong>Type:</strong> {{ appointment.appointment_type }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reschedule Form -->
+                    <form method="POST" class="mt-4">
+                        <div class="form-section mb-4">
+                            <h5 class="mb-3">
+                                <i class="fas fa-pencil-alt me-2"></i>Select New Date & Time
+                            </h5>
+
+                            <!-- New Date -->
+                            <div class="form-group mb-3">
+                                <label for="new_date" class="form-label">
+                                    <i class="fas fa-calendar me-2"></i>New Appointment Date
+                                </label>
+                                <input type="date" class="form-control" id="new_date" name="new_date" 
+                                       required min="{{ today }}" value="{{ appointment.appointment_date }}">
+                                <small class="text-muted">Select a date from today onwards</small>
+                            </div>
+
+                            <!-- New Time -->
+                            <div class="form-group mb-3">
+                                <label for="new_time" class="form-label">
+                                    <i class="fas fa-clock me-2"></i>New Appointment Time
+                                </label>
+                                <input type="time" class="form-control" id="new_time" name="new_time" 
+                                       required value="{{ appointment.appointment_time }}">
+                                <small class="text-muted">
+                                    Available slots:<br>
+                                    {% if doctor.morning_slot_start and doctor.morning_slot_end %}
+                                    🌅 Morning: {{ doctor.morning_slot_start }} - {{ doctor.morning_slot_end }}<br>
+                                    {% endif %}
+                                    {% if doctor.evening_slot_start and doctor.evening_slot_end %}
+                                    🌆 Evening: {{ doctor.evening_slot_start }} - {{ doctor.evening_slot_end }}
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Doctor Availability Info -->
+                        <div class="alert alert-secondary mb-4">
+                            <h6 class="mb-2">
+                                <i class="fas fa-info-circle me-2"></i>Doctor Availability
+                            </h6>
+                            <p class="mb-0">
+                                <strong>Working Days:</strong> {{ doctor.working_days or 'Monday to Friday' }}<br>
+                                <strong>Consultation Time:</strong> ~{{ doctor.avg_consultation_time or '30' }} minutes<br>
+                                <strong>Consultation Fee:</strong> ₹{{ doctor.consultation_fees }}
+                            </p>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg flex-grow-1">
+                                <i class="fas fa-calendar-check me-2"></i>Confirm Reschedule
+                            </button>
+                            <a href="{{ url_for('patient.my_appointments') }}" class="btn btn-secondary btn-lg flex-grow-1">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+
+                    <!-- Info Section -->
+                    <div class="alert alert-warning mt-4">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Important:</strong>
+                        <ul class="mb-0 mt-2 ps-3">
+                            <li>You can only reschedule booked appointments</li>
+                            <li>Previous appointment time will be released and available for others</li>
+                            <li>Confirmation email will be sent to your registered email address</li>
+                            <li>If you need to cancel instead, use the cancel option from appointments list</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-section {
+        padding: 1.5rem;
+        background-color: #f8f9fa;
+        border-radius: 0.5rem;
+    }
+</style>
+{% endblock %}

@@ -61,11 +61,14 @@ def create_app():
     from routes.admin import admin_bp
     from routes.doctor import doctor_bp
     from routes.patient import patient_bp
+    # Debug routes (local-only)
+    from routes.debug import debug_bp
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(doctor_bp)
     app.register_blueprint(patient_bp)
+    app.register_blueprint(debug_bp)
     
     @login_manager.user_loader
     def load_user(user_id):

@@ -40,7 +40,12 @@
                 </td>
                 <td>
                     {% if appointment.status == 'Booked' %}
-                    <a href="{{ url_for('patient.cancel_appointment', appointment_id=appointment.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Cancel this appointment?')">Cancel</a>
+                    <a href="{{ url_for('patient.reschedule_appointment', appointment_id=appointment.id) }}" class="btn btn-sm btn-warning" title="Reschedule appointment">
+                        <i class="fas fa-calendar-alt"></i> Reschedule
+                    </a>
+                    <a href="{{ url_for('patient.cancel_appointment', appointment_id=appointment.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Cancel this appointment?')" title="Cancel appointment">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
                     {% endif %}
                 </td>
             </tr>
