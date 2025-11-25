@@ -61,6 +61,7 @@ def create_app():
     from routes.admin import admin_bp
     from routes.doctor import doctor_bp
     from routes.patient import patient_bp
+    from routes.api import api_bp
     # Debug routes (local-only)
     from routes.debug import debug_bp
     
@@ -68,6 +69,7 @@ def create_app():
     app.register_blueprint(admin_bp)
     app.register_blueprint(doctor_bp)
     app.register_blueprint(patient_bp)
+    app.register_blueprint(api_bp)
     app.register_blueprint(debug_bp)
     
     @login_manager.user_loader
